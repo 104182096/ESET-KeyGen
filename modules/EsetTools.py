@@ -108,28 +108,22 @@ class EsetKeygen(object):
         console_log('\nSending a request for a license...', INFO)
         uCE(self.driver, f"return typeof {GET_EBAV}('ion-input', 'robot', 'device-protect-get-installer-email-input') === 'object'")
         exec_js(f"{GET_EBAV}('ion-input', 'robot', 'device-protect-get-installer-email-input').value = '{self.email_obj.email}'")
-        for _ in range(10): # Increasing the chance of getting a license, in theory
+        for _ in range(DEFAULT_MAX_ITER):
             exec_js(f"{GET_EBAV}('ion-button', 'robot', 'device-protect-get-installer-send-email-btn').click()")
-            time.sleep(0.005)
-        console_log('Request successfully sent!', OK)
+            for r in self.driver.requests:
+                if r.url.find('Get?uidOrPublicLicenseKey=') != -1:
+                    self.license_id = r.url.split('=')[-1]
+                    console_log('Request successfully sent!', OK)
+                    return True
+            time.sleep(DEFAULT_DELAY)
+        raise RuntimeError('Error sending request or parsing response!!!')
 
     def getLicenseData(self):
         exec_js = self.driver.execute_script
         uCE = untilConditionExecute
         console_log('\nLicense uploads...', INFO)
-        if platform.release() == '7' and sys.platform.startswith('win'): # old browser versions
-            for _ in range(DEFAULT_MAX_ITER):
-                self.driver.get('https://home.eset.com/subscriptions') # refresh page
-                try:
-                    exec_js(f"{DEFINE_GET_EBAV_FUNCTION}\n{GET_EBAV}('button', 'data-label', 'license-list-open-detail-page-btn').click()")
-                    break
-                except:
-                    time.sleep(3)
-        else: # new browser versions
-            self.driver.get('https://home.eset.com/subscriptions')
-            uCE(self.driver, f"return {CLICK_WITH_BOOL}({GET_EBAV}('button', 'data-label', 'license-list-open-detail-page-btn'))")
-        if self.driver.current_url.find('detail') != -1:
-            console_log(f'License ID: {self.driver.current_url[-11:]}', OK)
+        self.driver.get(f'https://home.eset.com/subscriptions/detail/{self.license_id}')
+        console_log(f'License ID: {self.driver.current_url[-11:]}', OK)
         uCE(self.driver, f"return typeof {GET_EBAV}('div', 'class', 'LicenseDetailInfo') === 'object'")
         license_name = exec_js(f"return {GET_EBAV}('div', 'data-r', 'license-detail-product-name').innerText")
         license_out_date = exec_js(f"return {GET_EBAV}('div', 'data-r', 'license-detail-license-model-additional-info').innerText")

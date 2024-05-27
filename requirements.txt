@@ -1,5 +1,8 @@
-selenium
+selenium-wire
+selenium==4.8.1
 requests
 colorama
 typing-extensions
 rich
+setuptools
+blinker<1.8.0

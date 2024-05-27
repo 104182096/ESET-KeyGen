@@ -1,6 +1,6 @@
-from selenium.webdriver import Chrome, ChromeOptions, ChromeService
-from selenium.webdriver import Firefox, FirefoxOptions, FirefoxService
-from selenium.webdriver import Edge, EdgeOptions, EdgeService
+from seleniumwire.webdriver import Chrome, ChromeOptions
+from seleniumwire.webdriver import Firefox, FirefoxOptions
+from seleniumwire.webdriver import Edge, EdgeOptions
 
 import traceback
 import colorama
@@ -165,7 +165,7 @@ def initSeleniumWebDriver(browser_name: str, webdriver_path = None, browser_path
             driver_options.add_argument('--no-sandbox')
             driver_options.add_argument('--disable-dev-shm-usage')
         try:
-            driver = Chrome(options=driver_options, service=ChromeService(executable_path=webdriver_path))
+            driver = Chrome(options=driver_options, executable_path=webdriver_path)
         except Exception as E:
             if traceback.format_exc().find('only supports') != -1: # Fix for downloaded chrome update
                 browser_path = traceback.format_exc().split('path')[-1].split('Stacktrace')[0].strip()
@@ -173,7 +173,7 @@ def initSeleniumWebDriver(browser_name: str, webdriver_path = None, browser_path
                     console_log('Downloaded Google Chrome update is detected! Using new chrome executable file!', INFO)
                     browser_path = browser_path[:-10]+'new_chrome.exe'
                     driver_options.binary_location = browser_path
-                    driver = Chrome(options=driver_options, service=ChromeService(executable_path=webdriver_path))
+                    driver = Chrome(options=driver_options, executable_path=webdriver_path)
             else:
                 raise E
     elif browser_name.lower() == 'firefox':
@@ -191,7 +191,7 @@ def initSeleniumWebDriver(browser_name: str, webdriver_path = None, browser_path
         except:
             pass
         os.environ['TMPDIR'] = (os.getcwd()+'/firefox_tmp').replace('\\', '/')
-        driver = Firefox(options=driver_options, service=FirefoxService(executable_path=webdriver_path))
+        driver = Firefox(options=driver_options, executable_path=webdriver_path)
     elif browser_name.lower() == 'edge':
         driver_options = EdgeOptions()
         driver_options.use_chromium = True
@@ -204,7 +204,7 @@ def initSeleniumWebDriver(browser_name: str, webdriver_path = None, browser_path
         if os.name == 'posix': # For Linux
             driver_options.add_argument('--no-sandbox')
             driver_options.add_argument('--disable-dev-shm-usage')
-        driver = Edge(options=driver_options, service=EdgeService(executable_path=webdriver_path))
+        driver = Edge(options=driver_options, executable_path=webdriver_path)
     #driver.set_window_position(0, 0)
     #driver.set_window_size(640, 640)
     return driver

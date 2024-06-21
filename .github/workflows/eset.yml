@@ -23,6 +23,7 @@ on:
         - guerrillamail
         - developermail
         default: developermail
+        
 jobs:
   GenerateKey:
     runs-on: ubuntu-latest
